@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DM2 Parauapebas — Painel Comercial</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root{--p:#1a472a;--pl:#2d8f4e;--pd:#0d3d1f;--ac:#3cb371;--bg:#f7f9f7;--card:#fff;--txt:#1a1a1a;--mut:#6b7b71;--brd:#d4ddd7;--red:#c0392b;--orange:#e67e22;--yellow:#f1c40f;--blue:#2980b9}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6}
+.cover{background:linear-gradient(135deg,#0d2137,#1a472a 40%,#2d8f4e);color:#fff;padding:40px 30px;text-align:center}
+.cover .logo{font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;opacity:0.5}
+.cover h1{font-size:2.2rem;font-weight:800;margin:6px 0}
+.cover .sub{font-size:1rem;opacity:0.8}
+.cover .period{margin-top:12px;display:inline-block;background:rgba(255,255,255,0.15);padding:5px 20px;border-radius:30px;font-size:0.85rem}
+.cover .live{display:inline-block;background:var(--red);padding:4px 14px;border-radius:20px;font-size:0.75rem;font-weight:700;margin-left:10px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.container{max-width:1200px;margin:0 auto;padding:24px 16px}
+.stitle{color:var(--p);font-size:1.2rem;font-weight:700;margin:30px 0 14px;padding-left:12px;border-left:4px solid var(--pl)}
+.note{font-size:0.75rem;color:var(--mut);font-style:italic;margin-top:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);text-align:center;border-top:4px solid var(--p)}
+.kpi.red{border-top-color:var(--red)}.kpi.ac{border-top-color:var(--ac)}.kpi.blue{border-top-color:var(--blue)}.kpi.orange{border-top-color:var(--orange)}
+.kpi .v{font-size:1.7rem;font-weight:800;color:var(--p)}.kpi.red .v{color:var(--red)}.kpi.ac .v{color:var(--ac)}.kpi.blue .v{color:var(--blue)}.kpi.orange .v{color:var(--orange)}
+.kpi .l{font-size:0.7rem;color:var(--mut);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
+.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.card h3{color:var(--p);margin-bottom:12px;font-size:1rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse;font-size:0.8rem}
+th{background:var(--p);color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.3px}
+td{padding:7px 10px;border-bottom:1px solid var(--brd)}
+tr:hover td{background:#f0f5f1}
+.tr{text-align:right}.tc{text-align:center}
+.badge{display:inline-block;padding:3px 10px;border-radius:14px;font-size:0.68rem;font-weight:700;color:#fff}
+.b-ok{background:var(--ac)}.b-warn{background:var(--orange)}.b-crit{background:var(--red)}.b-blue{background:var(--blue)}
+.insight{background:linear-gradient(135deg,var(--pd),var(--p));color:#fff;border-radius:12px;padding:22px;margin:16px 0}
+.insight h3{color:#fff;margin-bottom:8px}.insight li{margin-bottom:7px;opacity:0.9;line-height:1.5;font-size:0.85rem}
+.lead-card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);border-left:5px solid var(--pl)}
+.lead-card.hot{border-left-color:var(--red)}.lead-card.warm{border-left-color:var(--orange)}.lead-card.cold{border-left-color:var(--blue)}
+.lead-card h4{color:var(--p);font-size:0.9rem;margin-bottom:6px}
+.lead-card .meta{font-size:0.75rem;color:var(--mut)}
+.lead-card .quote{background:#f0f5f1;border-radius:8px;padding:10px;margin-top:8px;font-size:0.82rem;font-style:italic;border-left:3px solid var(--pl)}
+.emotion-bar{display:flex;height:28px;border-radius:6px;overflow:hidden;margin:6px 0}
+.emotion-bar div{display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pill{background:#e8f5e9;color:var(--p);padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600}
+.pill.red{background:#fce8e8;color:var(--red)}.pill.blue{background:#e3f2fd;color:var(--blue)}.pill.orange{background:#fff3e0;color:var(--orange)}
+.footer{text-align:center;padding:24px;color:var(--mut);font-size:0.72rem;border-top:1px solid var(--brd);margin-top:24px}
+.chat-bubble{max-width:80%;padding:10px 14px;border-radius:14px;margin:4px 0;font-size:0.82rem;line-height:1.4}
+.chat-lead{background:#e3f2fd;color:#1a1a1a;border-bottom-left-radius:4px;margin-right:auto}
+.chat-sdr{background:var(--p);color:#fff;border-bottom-right-radius:4px;margin-left:auto}
+.chat-container{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;padding:8px}
+.section-nav{position:sticky;top:0;z-index:10;background:var(--p);padding:8px 16px;display:flex;gap:12px;overflow-x:auto;white-space:nowrap}
+.section-nav a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem;padding:4px 12px;border-radius:20px;transition:all 0.2s}
+.section-nav a:hover,.section-nav a.active{background:rgba(255,255,255,0.15);color:#fff}
+@media(max-width:768px){.kpis{grid-template-columns:repeat(2,1fr)}.row,.row3{grid-template-columns:1fr}.cover h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="logo">Doutor DM2 Diabetes</div>
+  <h1>Parauapebas &mdash; Painel Comercial</h1>
+  <div class="sub">Analise de Leads, Criativos e Atendimento</div>
+  <div class="period">16 de Marco de 2026 <span class="live">PRIMEIRO DIA</span></div>
+</div>
+
+<nav class="section-nav">
+  <a href="#resumo">Resumo</a>
+  <a href="#criativos">Criativos</a>
+  <a href="#leads">Leads</a>
+  <a href="#objecoes">Objecoes</a>
+  <a href="#perfil">Perfil Emocional</a>
+  <a href="#medicamentos">Medicamentos</a>
+  <a href="#atendimento">Atendimento</a>
+  <a href="#acoes">Acoes</a>
+</nav>
+
+<div class="container">
+
+<!-- RESUMO -->
+<div id="resumo" class="stitle">Resumo do Dia</div>
+<p class="note">Primeiro dia de operacao real — 12 leads em ~6 horas de atendimento</p>
+<div class="kpis" style="margin-top:12px">
+  <div class="kpi ac"><div class="v">12</div><div class="l">Leads Reais</div></div>
+  <div class="kpi blue"><div class="v">2</div><div class="l">Campanhas Ativas</div></div>
+  <div class="kpi"><div class="v">R$ 237</div><div class="l">Investimento Total</div></div>
+  <div class="kpi ac"><div class="v">R$ 7,69</div><div class="l">CPL (Vendas)</div></div>
+  <div class="kpi"><div class="v">19</div><div class="l">Msgs Meta</div></div>
+  <div class="kpi blue"><div class="v">2</div><div class="l">SDRs Ativas</div></div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <h3>Campanhas</h3>
+    <table>
+      <tr><th>Campanha</th><th class="tr">Gasto</th><th class="tr">Msgs</th><th class="tr">CPL</th></tr>
+      <tr><td><span class="badge b-ok">Vendas/WPP</span> cep-parauapebas [35+]</td><td class="tr">R$ 146</td><td class="tr">19</td><td class="tr"><strong>R$ 7,69</strong></td></tr>
+      <tr><td><span class="badge b-blue">Trafego</span> perfil [35+] interesses</td><td class="tr">R$ 91</td><td class="tr">0</td><td class="tr" style="color:var(--mut)">sem msgs</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Distribuicao</h3>
+    <canvas id="campChart" height="180"></canvas>
+  </div>
+</div>
+
+<!-- CRIATIVOS -->
+<div id="criativos" class="stitle">Performance por Criativo</div>
+<p class="note">Cruzamento: thumbnail do Meta Ads no metadata do ZapClinic identifica qual anuncio trouxe cada lead</p>
+
+<div class="row" style="margin-top:12px">
+  <div class="card" style="border-top:4px solid var(--ac)">
+    <h3>&#127942; ads controle nao funciona</h3>
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi ac" style="padding:10px"><div class="v" style="font-size:1.4rem">5</div><div class="l">Leads</div></div>
+      <div class="kpi" style="padding:10px"><div class="v" style="font-size:1.4rem">R$ 75</div><div class="l">Gasto</div></div>
+      <div class="kpi" style="padding:10px"><div class="v" style="font-size:1.4rem">R$ 9,34</div><div class="l">CPL</div></div>
+    </div>
+    <p style="font-size:0.82rem;margin-top:8px"><strong>Saudacoes pre-preenchidas:</strong></p>
+    <div class="pills">
+      <span class="pill">"quero agendar uma avaliacao"</span>
+      <span class="pill">"quero saber como funciona"</span>
+      <span class="pill">"quero falar com especialista"</span>
+    </div>
+    <p style="font-size:0.82rem;margin-top:8px;color:var(--ac)"><strong>&#9650; Lead mais aquecido — chega com intencao clara</strong></p>
+  </div>
+
+  <div class="card" style="border-top:4px solid var(--blue)">
+    <h3>ads voce sofre com dm2</h3>
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi blue" style="padding:10px"><div class="v" style="font-size:1.4rem">4</div><div class="l">Leads</div></div>
+      <div class="kpi" style="padding:10px"><div class="v" style="font-size:1.4rem">R$ 66</div><div class="l">Gasto</div></div>
+      <div class="kpi" style="padding:10px"><div class="v" style="font-size:1.4rem">R$ 8,27</div><div class="l">CPL</div></div>
+    </div>
+    <p style="font-size:0.82rem;margin-top:8px"><strong>Mensagens livres dos leads:</strong></p>
+    <div class="pills">
+      <span class="pill blue">"Onde fica e qual o valor"</span>
+      <span class="pill blue">"aceita convenio apvida"</span>
+    </div>
+    <p style="font-size:0.82rem;margin-top:8px;color:var(--blue)"><strong>&#9660; Lead mais frio — pergunta preco/localizacao primeiro</strong></p>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Comparativo de Engajamento</h3>
+  <canvas id="criativoChart" height="120"></canvas>
+</div>
+
+<!-- LEADS DETALHADOS -->
+<div id="leads" class="stitle">Leads Detalhados</div>
+<p class="note">Cada lead com criativo de origem, conversa resumida, e classificacao emocional</p>
+
+<div class="lead-card hot">
+  <h4>&#128293; Francisco Flavio Pereira Lima <span class="badge b-crit">URGENCIA MAXIMA</span></h4>
+  <div class="meta">Criativo: sem metadata | SDR: Mireia | Resp: 32min | Marcando pra: marido</div>
+  <div class="quote">
+    "Ola meu marido descobriu hoje que esta com diabetes tipo 2"<br>
+    "Ele fez varios exames e foi constatado"<br>
+    "Voces atendem por convenio?"<br>
+    [enviou foto dos medicamentos receitados]<br>
+    "Ele recebeu o resultado as 11h e o anuncio de voces apareceu na minha rede social as 12h30"
+  </div>
+  <div class="pills" style="margin-top:8px">
+    <span class="pill red">diagnostico hoje</span>
+    <span class="pill red">convenio?</span>
+    <span class="pill orange">cuidadora (esposa)</span>
+    <span class="pill">enviou receita</span>
+  </div>
+</div>
+
+<div class="lead-card hot">
+  <h4>&#128293; Lucineia de Brito <span class="badge b-crit">FRUSTRADA</span></h4>
+  <div class="meta">Criativo: ads voce sofre com dm2 | SDR: Mireia | Resp: 9min</div>
+  <div class="quote">
+    "Onde fica e qual o valor da consulta"<br>
+    "Glifage xr 500mg" — toma ha 5 anos<br>
+    "Pensei mal fui pra upa e estava alta"<br>
+    "Quais sao os horarios de atendimento" / "Pra mim ir ai"<br>
+    [tentou ligar pra clinica]
+  </div>
+  <div class="pills" style="margin-top:8px">
+    <span class="pill red">glicose descontrolada</span>
+    <span class="pill red">foi parar na UPA</span>
+    <span class="pill">Glifage XR 500mg</span>
+    <span class="pill orange">5 anos de tratamento</span>
+    <span class="pill" style="background:#d4edda">QUER AGENDAR</span>
+  </div>
+</div>
+
+<div class="lead-card warm">
+  <h4>&#128170; Louriano <span class="badge b-warn">DESCRENCA</span></h4>
+  <div class="meta">Criativo: ads controle nao funciona | SDR: Caroliny | Resp: 7min</div>
+  <div class="quote">
+    "Ola! Vim pelo anuncio, quero saber como funciona!"<br>
+    "Ja tomei um medicamento que a doutora passou e agora eu to tomando um cha"<br>
+    "Com certeza melhor assim"
+  </div>
+  <div class="pills" style="margin-top:8px">
+    <span class="pill orange">abandonou medicamento</span>
+    <span class="pill orange">usa cha</span>
+    <span class="pill">aberto a alternativas</span>
+  </div>
+</div>
+
+<div class="lead-card warm">
+  <h4>&#128161; Jose <span class="badge b-ok">ENGAJADO</span></h4>
+  <div class="meta">Criativo: ads controle nao funciona | SDR: Mireia | Resp: 1min</div>
+  <div class="quote">
+    "Ola! Vim pelo anuncio, quero falar com especialista."<br>
+    [ligou pra clinica 1 min depois]<br>
+    [trocou audios com SDR]
+  </div>
+  <div class="pills" style="margin-top:8px">
+    <span class="pill" style="background:#d4edda">ligou pra clinica</span>
+    <span class="pill">quer especialista</span>
+    <span class="pill">alta urgencia</span>
+  </div>
+</div>
+
+<div class="lead-card warm">
+  <h4>&#128170; Junior <span class="badge b-blue">INFLUENCIADOR</span></h4>
+  <div class="meta">Criativo: sem metadata | SDR: Caroliny | Resp: 1min</div>
+  <div class="quote">
+    "nenhuma" (nao toma medicamento)<br>
+    "Quero saber o endereco valor da consulta para que eu possa indicar para meus amigos"<br>
+    "os medicamentos utilizados sao manipulados ou quimico?"
+  </div>
+  <div class="pills" style="margin-top:8px">
+    <span class="pill blue">nao e paciente</span>
+    <span class="pill blue">quer indicar amigos</span>
+    <span class="pill orange">duvida: manipulado vs quimico</span>
+  </div>
+</div>
+
+<div class="lead-card warm">
+  <h4>&#128170; Luis <span class="badge b-blue">CUIDADOR</span></h4>
+  <div class="meta">Criativo: ads voce sofre com dm2 | SDR: Mireia | Resp: 1min</div>
+  <div class="quote">
+    "Onde fica clinica de vcs"<br>
+    "Minha mae" (busca pra mae)<br>
+    "Em breve entro em contato"
+  </div>
+  <div class="pills" style="margin-top:8px">
+    <span class="pill blue">busca pra mae</span>
+    <span class="pill orange">adiou contato</span>
+  </div>
+</div>
+
+<div class="lead-card cold">
+  <h4>Sueli Montibeller <span class="badge b-warn">CURIOSA</span></h4>
+  <div class="meta">Criativo: sem metadata | SDR: Caroliny | Resp: 10min</div>
+  <div class="quote">"Tem esse tratamento aqui em Parauapebas?" + [enviou imagem]</div>
+</div>
+
+<div class="lead-card cold">
+  <h4>&#129300; 🤩&#128158; (sem nome) <span class="badge b-warn">CONVENIO</span></h4>
+  <div class="meta">Criativo: ads voce sofre com dm2 | SDR: Mireia | Resp: 12min</div>
+  <div class="quote">"Boa tarde aceita convenio apvida"</div>
+  <div class="pills" style="margin-top:8px"><span class="pill red">objecao: convenio</span><span class="pill red">nao respondeu mais</span></div>
+</div>
+
+<div class="row">
+  <div class="lead-card cold">
+    <h4>Beto Vaz <span class="badge b-crit">LEAD PERDIDO</span></h4>
+    <div class="meta">Criativo: ads controle nao funciona | SDR: Mireia | Resp: 2h19min</div>
+    <div class="quote">"Ola! Vim pelo anuncio, quero agendar uma avaliacao."<br>"Ola! Vim pelo anuncio, quero saber como funciona!"<br>[SDR respondeu 2h19 depois — lead nao voltou]</div>
+  </div>
+  <div class="lead-card cold">
+    <h4>Lucia / Maria Izabela / Antonio</h4>
+    <div class="meta">Conversas por audio — conteudo nao analisavel por texto</div>
+    <div class="quote">Lucia: "Boa tarde eu so peguei o contato eu estou fora da cidade"<br>Maria Izabela e Antonio: trocaram audios com SDR</div>
+  </div>
+</div>
+
+<!-- OBJECOES -->
+<div id="objecoes" class="stitle">Objecoes Mapeadas</div>
+<div class="card" style="margin-top:12px">
+  <canvas id="objecaoChart" height="160"></canvas>
+</div>
+
+<div class="row" style="margin-top:12px">
+  <div class="card" style="border-left:5px solid var(--red)">
+    <h3>#1 Preco / Convenio (33%)</h3>
+    <p style="font-size:0.85rem">"Aceita convenio apvida?", "Voces atendem por convenio?", "Qual o valor da consulta"</p>
+    <p style="font-size:0.82rem;margin-top:8px;color:var(--red)"><strong>Impacto:</strong> 4 de 12 leads perguntaram sobre valor/convenio ANTES de qualquer outra coisa. O criativo nao deixa claro.</p>
+    <p style="font-size:0.82rem;margin-top:4px;color:var(--p)"><strong>Solucao:</strong> Incluir no anuncio "Consulta particular a partir de R$___" ou "Consulte convenios aceitos"</p>
+  </div>
+  <div class="card" style="border-left:5px solid var(--orange)">
+    <h3>#2 Localizacao (25%)</h3>
+    <p style="font-size:0.85rem">"Onde fica?", "Onde fica clinica de vcs", "Tem esse tratamento AQUI em Parauapebas?"</p>
+    <p style="font-size:0.82rem;margin-top:8px;color:var(--orange)"><strong>Impacto:</strong> Unidade nova — as pessoas nao sabem que existe clinica em Parauapebas.</p>
+    <p style="font-size:0.82rem;margin-top:4px;color:var(--p)"><strong>Solucao:</strong> Reforcar "EM PARAUAPEBAS" no criativo. Mostrar fachada/mapa.</p>
+  </div>
+</div>
+<div class="row">
+  <div class="card" style="border-left:5px solid var(--yellow)">
+    <h3>#3 Tipo de Medicamento (8%)</h3>
+    <p style="font-size:0.85rem">"Os medicamentos utilizados sao manipulados ou quimico?"</p>
+    <p style="font-size:0.82rem;margin-top:4px;color:var(--p)"><strong>Solucao:</strong> SDR deve ter resposta padrao pronta sobre o protocolo.</p>
+  </div>
+  <div class="card" style="border-left:5px solid var(--blue)">
+    <h3>#4 Adiamento (8%)</h3>
+    <p style="font-size:0.85rem">"Em breve entro em contato", "so peguei o contato"</p>
+    <p style="font-size:0.82rem;margin-top:4px;color:var(--p)"><strong>Solucao:</strong> Follow-up em 24h com conteudo educativo, nao so "Eii, ta ai?"</p>
+  </div>
+</div>
+
+<!-- PERFIL EMOCIONAL -->
+<div id="perfil" class="stitle">Perfil Emocional dos Leads</div>
+<div class="card" style="margin-top:12px">
+  <div class="emotion-bar">
+    <div style="width:35%;background:var(--red)">MEDO 35%</div>
+    <div style="width:25%;background:var(--orange)">FRUSTRACAO 25%</div>
+    <div style="width:20%;background:var(--yellow);color:#333">CURIOSIDADE 20%</div>
+    <div style="width:15%;background:var(--blue)">PESQUISA 15%</div>
+    <div style="width:5%;background:var(--ac)">OUTROS</div>
+  </div>
+  <table style="margin-top:14px">
+    <tr><th>Perfil</th><th>%</th><th>Quem</th><th>Gatilho</th><th>Como Abordar</th></tr>
+    <tr>
+      <td><span class="badge b-crit">MEDO/URGENCIA</span></td>
+      <td class="tc">35%</td>
+      <td>Francisco, Lucineia</td>
+      <td>Diagnostico recente, piora subita, UPA</td>
+      <td style="font-size:0.78rem">Acolher primeiro, depois protocolo. "Entendo sua preocupacao, voce esta no lugar certo"</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-warn">FRUSTRACAO</span></td>
+      <td class="tc">25%</td>
+      <td>Louriano, Lucineia</td>
+      <td>Tratamento nao funciona, glicose alta</td>
+      <td style="font-size:0.78rem">Validar a dor. "Muitos pacientes chegam assim. O Metodo Reverse tem 70% de remissao"</td>
+    </tr>
+    <tr>
+      <td><span class="badge" style="background:var(--yellow);color:#333">CURIOSIDADE</span></td>
+      <td class="tc">20%</td>
+      <td>Sueli, Antonio, Maria Izabela</td>
+      <td>Viram anuncio, querem entender</td>
+      <td style="font-size:0.78rem">Responder rapido com informacao clara. Perdem interesse facil</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-blue">PESQUISADOR</span></td>
+      <td class="tc">15%</td>
+      <td>Junior, Luis</td>
+      <td>Buscando pra terceiros, comparando</td>
+      <td style="font-size:0.78rem">Dar material pra compartilhar. "Posso enviar um resumo pro seu amigo/mae?"</td>
+    </tr>
+  </table>
+</div>
+
+<!-- MEDICAMENTOS -->
+<div id="medicamentos" class="stitle">Medicamentos e Sintomas Citados</div>
+<div class="row" style="margin-top:12px">
+  <div class="card">
+    <h3>Medicamentos</h3>
+    <table>
+      <tr><th>Medicamento</th><th>Lead</th><th>Contexto</th></tr>
+      <tr><td><strong>Glifage XR 500mg</strong></td><td>Lucineia</td><td>Toma ha 5 anos, glicose ainda alta</td></tr>
+      <tr><td><strong>Cha (alternativo)</strong></td><td>Louriano</td><td>Abandonou medicamento prescrito</td></tr>
+      <tr><td><strong>Receita medica (foto)</strong></td><td>Francisco</td><td>Diagnosticado hoje, receita nova</td></tr>
+      <tr><td><strong>Nenhum</strong></td><td>Junior</td><td>Nao e paciente, quer indicar</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Situacoes Clinicas</h3>
+    <table>
+      <tr><th>Situacao</th><th>Lead</th></tr>
+      <tr><td style="color:var(--red);font-weight:700">Diagnostico de DM2 HOJE</td><td>Francisco (marido)</td></tr>
+      <tr><td style="color:var(--red);font-weight:700">Internacao UPA por glicose alta</td><td>Lucineia</td></tr>
+      <tr><td style="color:var(--orange);font-weight:700">Abandono de tratamento convencional</td><td>Louriano</td></tr>
+      <tr><td>Buscando tratamento pra familiar</td><td>Luis (mae), Francisco (esposa pro marido)</td></tr>
+      <tr><td>Fora da cidade no momento</td><td>Lucia</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ATENDIMENTO -->
+<div id="atendimento" class="stitle">Analise do Atendimento SDR</div>
+<div class="row" style="margin-top:12px">
+  <div class="card">
+    <h3>Tempo de Resposta</h3>
+    <table>
+      <tr><th>Lead</th><th>SDR</th><th class="tc">Tempo</th><th class="tc">Status</th></tr>
+      <tr><td>Jose</td><td>Mireia</td><td class="tc">1min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Junior</td><td>Caroliny</td><td class="tc">1min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Lucia</td><td>Caroliny</td><td class="tc">1min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Luis</td><td>Mireia</td><td class="tc">1min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Louriano</td><td>Caroliny</td><td class="tc">7min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Lucineia</td><td>Mireia</td><td class="tc">9min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Maria Izabela</td><td>Caroliny</td><td class="tc">9min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Sueli</td><td>Caroliny</td><td class="tc">10min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>&#129300;&#128158;</td><td>Mireia</td><td class="tc">12min</td><td class="tc"><span class="badge b-ok">OK</span></td></tr>
+      <tr><td>Antonio</td><td>Caroliny</td><td class="tc">16min</td><td class="tc"><span class="badge b-warn">ALERTA</span></td></tr>
+      <tr><td>Francisco</td><td>Mireia</td><td class="tc">32min</td><td class="tc"><span class="badge b-warn">ALERTA</span></td></tr>
+      <tr><td>Beto Vaz</td><td>Mireia</td><td class="tc">2h19min</td><td class="tc"><span class="badge b-crit">PERDIDO</span></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Pontos de Atencao</h3>
+    <div style="margin-bottom:14px">
+      <p style="font-size:0.85rem;font-weight:700;color:var(--p)">O que esta bom:</p>
+      <ul style="font-size:0.82rem;padding-left:16px;color:var(--mut)">
+        <li>9 de 12 leads respondidos em &lt;15 min</li>
+        <li>SDRs usam audio (cria conexao pessoal)</li>
+        <li>Perguntam medicamento na saudacao (qualifica rapido)</li>
+      </ul>
+    </div>
+    <div>
+      <p style="font-size:0.85rem;font-weight:700;color:var(--red)">O que precisa melhorar:</p>
+      <ul style="font-size:0.82rem;padding-left:16px;color:var(--mut)">
+        <li><strong>Mensagens duplicadas/quadruplicadas</strong> — verificar ZapClinic, possivel bug de multiplos dispositivos</li>
+        <li><strong>Follow-up generico</strong> — "Eii, ta ai?!" enviado em massa as 16:33 pra todos. Precisa ser personalizado</li>
+        <li><strong>Beto Vaz perdido</strong> — queria AGENDAR e esperou 2h19. Lead quente esfriou</li>
+        <li><strong>Saudacao igual pra todos</strong> — Junior nao tem diabetes e recebeu "Quais medicamentos esta tomando?"</li>
+        <li><strong>Muito audio, pouco texto</strong> — impossivel auditar qualidade do atendimento</li>
+      </ul>
+    </div>
+    <div style="margin-top:14px">
+      <canvas id="sdrChart" height="140"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ACOES -->
+<div id="acoes" class="stitle">Acoes Recomendadas</div>
+<div class="insight">
+  <h3>Prioridade Imediata</h3>
+  <ul>
+    <li><strong>Corrigir mensagens duplicadas</strong> — verificar se ha multiplos dispositivos/sessoes conectados ao ZapClinic</li>
+    <li><strong>Follow-up personalizado</strong> — trocar "Eii, ta ai?!" por mensagem com conteudo relevante (video de depoimento, endereco, valor)</li>
+    <li><strong>Resposta padrao para convenio</strong> — ter texto pronto: "Trabalhamos com atendimento particular. O investimento e de R$___ e inclui ___"</li>
+    <li><strong>Qualificar ANTES da saudacao de medicamentos</strong> — perguntar primeiro: "A consulta e pra voce ou pra um familiar?"</li>
+  </ul>
+</div>
+
+<div class="insight" style="background:linear-gradient(135deg,#1a3a5c,#2980b9)">
+  <h3>Para os Criativos</h3>
+  <ul>
+    <li><strong>Escalar "ads controle nao funciona"</strong> — melhor criativo, traz lead mais aquecido</li>
+    <li><strong>Incluir localizacao visual nos anuncios</strong> — mapa ou fachada. 25% nao sabe onde fica</li>
+    <li><strong>Mencionar politica de convenio/valor</strong> — elimina 33% das objecoes antes do clique</li>
+    <li><strong>Campanha de trafego gastou R$91 com 0 mensagens</strong> — avaliar se vale manter ou redirecionar budget</li>
+    <li><strong>Testar variacao:</strong> "Voce toma remedio e a glicose continua alta?" (baseado no perfil Lucineia/Louriano)</li>
+  </ul>
+</div>
+
+<div class="card" style="text-align:center;background:linear-gradient(135deg,#e8f5e9,#f7f9f7);border:2px solid var(--ac)">
+  <h3 style="color:var(--ac);font-size:1.1rem">Resultado do Primeiro Dia</h3>
+  <p style="font-size:1rem;margin:10px 0"><strong>12 leads reais com R$ 237 investidos = CPL R$ 7,69</strong></p>
+  <p style="font-size:0.85rem;color:var(--mut)">Excelente CPL para unidade nova. Foco agora: converter esses leads em agendamentos corrigindo os pontos de atendimento.</p>
+</div>
+
+</div>
+
+<div class="footer">
+  Painel gerado em 16/03/2026 | Dados: Meta Ads API (conta 2428950724211358) + ZapClinic (s18.zapclinic.app)<br>
+  Doutor DM2 Diabetes — Parauapebas, PA
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+new Chart(document.getElementById('campChart'),{
+  type:'doughnut',
+  data:{labels:['Vendas/WPP','Trafego Perfil'],datasets:[{data:[146,91],backgroundColor:['#2d8f4e','#2980b9'],borderWidth:3,borderColor:'#fff'}]},
+  options:{responsive:true,cutout:'55%',plugins:{legend:{position:'bottom'},datalabels:{color:'#fff',font:{weight:'bold',size:13},formatter:function(v,c){var s=c.dataset.data.reduce((a,b)=>a+b,0);return'R$'+v+'\n('+(v/s*100).toFixed(0)+'%)'}}}}
+});
+
+new Chart(document.getElementById('criativoChart'),{
+  type:'bar',
+  data:{
+    labels:['ads controle\nnao funciona','ads voce sofre\ncom dm2','Sem metadata'],
+    datasets:[
+      {label:'Leads',data:[5,4,3],backgroundColor:'#2d8f4e',borderRadius:6,
+        datalabels:{anchor:'end',align:'top',color:'#1a472a',font:{weight:'bold',size:12}}},
+      {label:'Conversas longas (3+ msgs)',data:[4,2,1],backgroundColor:'#3cb371',borderRadius:6,
+        datalabels:{anchor:'end',align:'top',color:'#2d8f4e',font:{weight:'bold',size:11}}}
+    ]
+  },
+  options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,max:7}}}
+});
+
+new Chart(document.getElementById('objecaoChart'),{
+  type:'bar',
+  data:{
+    labels:['Preco / Convenio','Localizacao','Tipo medicamento','Adiamento'],
+    datasets:[{data:[4,3,1,1],backgroundColor:['#c0392b','#e67e22','#f1c40f','#2980b9'],borderRadius:8,
+      datalabels:{anchor:'end',align:'top',color:'#1a1a1a',font:{weight:'bold',size:12},formatter:v=>{var t=9;return(v/t*100).toFixed(0)+'%'}}}]
+  },
+  options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:5}}}
+});
+
+new Chart(document.getElementById('sdrChart'),{
+  type:'bar',
+  data:{
+    labels:['Caroliny','Mireia'],
+    datasets:[
+      {label:'Leads atendidos',data:[5,7],backgroundColor:'#2d8f4e',borderRadius:6,
+        datalabels:{color:'#fff',font:{weight:'bold'}}},
+      {label:'Resp <5min',data:[2,3],backgroundColor:'#3cb371',borderRadius:6,
+        datalabels:{color:'#fff',font:{weight:'bold'}}}
+    ]
+  },
+  options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,max:8}}}
+});
+</script>
+</body></html>

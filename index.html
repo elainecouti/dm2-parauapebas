@@ -4,6 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DM2 Parauapebas — Painel Comercial</title>
+<style>body{visibility:hidden}</style>
+<script>
+(function(){
+  var HASH = "e566c22bab58a79ba8b9f49336a60569a178260cd21facebbbcc51197d54b79b";
+  async function h(s){
+    var b = new TextEncoder().encode(s);
+    var d = await crypto.subtle.digest('SHA-256', b);
+    return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+  function showContent(){ document.body.style.visibility=''; }
+  function showOverlay(){
+    document.body.style.visibility='';
+    var overlay=document.createElement('div');
+    overlay.id='auth-overlay';
+    overlay.innerHTML='<div style="background:#fff;border-radius:16px;padding:40px 32px;width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18)"><div style="font-size:2rem;margin-bottom:8px">🔒</div><div style="font-weight:800;font-size:1.2rem;color:#1a472a;margin-bottom:4px">DM2 Parauapebas</div><div style="color:#6b7b71;font-size:0.85rem;margin-bottom:24px">Painel restrito</div><input id="pw-input" type="password" placeholder="Senha" style="width:100%;padding:10px 14px;border:1.5px solid #d4ddd7;border-radius:8px;font-size:1rem;outline:none;margin-bottom:12px"><div id="pw-error" style="color:#c0392b;font-size:0.8rem;min-height:18px;margin-bottom:8px"></div><button id="pw-btn" style="width:100%;padding:11px;background:#1a472a;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer">Entrar</button></div>';
+    overlay.style.cssText='position:fixed;inset:0;background:linear-gradient(135deg,#0d2137,#1a472a 40%,#2d8f4e);display:flex;align-items:center;justify-content:center;z-index:9999';
+    document.body.appendChild(overlay);
+    var input=document.getElementById('pw-input');
+    var btn=document.getElementById('pw-btn');
+    var err=document.getElementById('pw-error');
+    async function check(){
+      var hashed = await h(input.value.trim());
+      if(hashed===HASH){sessionStorage.setItem('dm2auth','ok');overlay.remove();}
+      else{err.textContent='Senha incorreta';input.value='';input.focus();}
+    }
+    btn.addEventListener('click',check);
+    input.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+    input.focus();
+  }
+  if(sessionStorage.getItem('dm2auth')==='ok'){
+    document.addEventListener('DOMContentLoaded', showContent);
+  } else {
+    document.addEventListener('DOMContentLoaded', showOverlay);
+  }
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
